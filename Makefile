@@ -33,6 +33,15 @@ uicache: uicache.m uicache.plist
 	strip uicache
 	$(LDID) -Suicache.plist uicache
 
+# Universal rootless build for iOS 27's containerized registration transport.
+uicache27: uicache.m ent27.plist
+	$(eval SDK := $(shell xcrun --sdk iphoneos --show-sdk-path))
+	xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.0 -isysroot $(SDK) -fobjc-arc -O2 -Wall -Wextra -framework Foundation -framework MobileCoreServices uicache.m -o uicache27.arm64
+	xcrun -sdk iphoneos clang -arch arm64e -miphoneos-version-min=15.0 -isysroot $(SDK) -fobjc-arc -O2 -Wall -Wextra -framework Foundation -framework MobileCoreServices uicache.m -o uicache27.arm64e
+	lipo -create uicache27.arm64 uicache27.arm64e -output uicache27
+	rm -f uicache27.arm64 uicache27.arm64e
+	$(LDID) -Sent27.plist -Cadhoc uicache27
+
 uiduid: uiduid.m ent.plist
 	$(CC) uiduid.m -o uiduid -framework Foundation -lMobileGestalt -fobjc-arc -O3
 	strip uiduid
@@ -44,4 +53,4 @@ uiopen: uiopen.m ent.plist
 	$(LDID) -Suiopen.plist uiopen
 
 clean:
-	rm cfversion sbdidlaunch sbreload uicache uiduid uiopen
+	rm -f cfversion gssc ldrestart sbdidlaunch sbreload uicache uicache27 uiduid uiopen
